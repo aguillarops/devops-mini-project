@@ -4,6 +4,6 @@ global:
 scrape_configs:
   - job_name: 'flask_app'
     static_configs:
-      - targets: ['localhost:5000'] # Assumindo que o Prometheus rodará localmente ou terá acesso à aplicação
+      - targets: devops-mini-project-lb-1688131089.us-east-1.elb.amazonaws.com:80
     metrics_path: /api/metrics
 

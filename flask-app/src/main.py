@@ -1,6 +1,6 @@
 import os
 import sys
-# DON'T CHANGE THIS !!!
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from flask import Flask, send_from_directory, jsonify
@@ -11,18 +11,14 @@ from src.routes.health import health_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 
-# Configuração de CORS para permitir acesso externo
 CORS(app, origins="*")
 
-# Configurações da aplicação
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'asdf#FGSgvasgf$5$WGT')
 app.config['ENVIRONMENT'] = os.getenv('ENVIRONMENT', 'development')
 
-# Registro dos blueprints
 app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(health_bp, url_prefix='/api')
 
-# Configuração do banco de dados
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)

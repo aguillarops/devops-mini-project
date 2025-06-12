@@ -6,7 +6,6 @@ from datetime import datetime
 
 health_bp = Blueprint('health', __name__)
 
-# Variável para armazenar o tempo de início da aplicação
 start_time = time.time()
 
 @health_bp.route('/health', methods=['GET'])
@@ -23,7 +22,6 @@ def health_check():
 def metrics():
     """Endpoint de métricas básicas para monitoramento"""
     try:
-        # Métricas do sistema
         cpu_percent = psutil.cpu_percent(interval=1)
         memory = psutil.virtual_memory()
         disk = psutil.disk_usage('/')
@@ -55,8 +53,6 @@ def metrics():
 @health_bp.route('/ready', methods=['GET'])
 def readiness_check():
     """Endpoint de readiness para Kubernetes/ECS"""
-    # Aqui você pode adicionar verificações específicas
-    # como conectividade com banco de dados, etc.
     return jsonify({
         'status': 'ready',
         'timestamp': datetime.utcnow().isoformat()

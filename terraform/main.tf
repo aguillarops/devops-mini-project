@@ -261,5 +261,3 @@ resource "aws_lb_listener" "http_listener" {
     Name = "${var.project_name}-http-listener"
   }
 }
-
-

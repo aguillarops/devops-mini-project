@@ -28,7 +28,10 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    """Endpoint raiz com informações da API"""
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/info')
+def info():
     return jsonify({
         'message': 'DevOps Mini Project API',
         'version': '1.0.0',

@@ -4,5 +4,5 @@ global:
 scrape_configs:
   - job_name: 'flask_app'
     static_configs:
-      - targets: ['devops-mini-project-lb-2070178412.us-east-1.elb.amazonaws.com']
+      - targets: ['devops-mini-project-lb-591531424.us-east-1.elb.amazonaws.com']
     metrics_path: /api/metrics

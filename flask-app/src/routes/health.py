@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, Response
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST, Gauge
 import time
 import psutil
 import os
@@ -8,9 +9,13 @@ health_bp = Blueprint('health', __name__)
 
 start_time = time.time()
 
+# Definindo métricas
+cpu_usage = Gauge('system_cpu_percent', 'Uso de CPU (%)')
+mem_usage = Gauge('system_memory_percent', 'Uso de memória (%)')
+uptime = Gauge('system_uptime_seconds', 'Uptime da aplicação (segundos)')
+
 @health_bp.route('/health', methods=['GET'])
 def health_check():
-    """Endpoint de health check para verificação de saúde da aplicação"""
     return jsonify({
         'status': 'healthy',
         'timestamp': datetime.utcnow().isoformat(),
@@ -20,41 +25,25 @@ def health_check():
 
 @health_bp.route('/metrics', methods=['GET'])
 def metrics():
-    """Endpoint de métricas básicas para monitoramento"""
+    """Endpoint de métricas compatível com Prometheus"""
     try:
-        cpu_percent = psutil.cpu_percent(interval=1)
+        cpu = psutil.cpu_percent(interval=1)
         memory = psutil.virtual_memory()
-        disk = psutil.disk_usage('/')
-        
-        return jsonify({
-            'timestamp': datetime.utcnow().isoformat(),
-            'uptime_seconds': int(time.time() - start_time),
-            'system': {
-                'cpu_percent': cpu_percent,
-                'memory_percent': memory.percent,
-                'memory_used_mb': memory.used // (1024 * 1024),
-                'memory_total_mb': memory.total // (1024 * 1024),
-                'disk_percent': (disk.used / disk.total) * 100,
-                'disk_used_gb': disk.used // (1024 * 1024 * 1024),
-                'disk_total_gb': disk.total // (1024 * 1024 * 1024)
-            },
-            'application': {
-                'version': '1.0.0',
-                'environment': os.getenv('ENVIRONMENT', 'development'),
-                'process_id': os.getpid()
-            }
-        }), 200
+        up = int(time.time() - start_time)
+
+        # Atualiza métricas Prometheus
+        cpu_usage.set(cpu)
+        mem_usage.set(memory.percent)
+        uptime.set(up)
+
+        # Retorna no formato Prometheus
+        return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
     except Exception as e:
-        return jsonify({
-            'error': 'Failed to collect metrics',
-            'message': str(e)
-        }), 500
+        return Response(f"# erro: {str(e)}", status=500, mimetype="text/plain")
 
 @health_bp.route('/ready', methods=['GET'])
 def readiness_check():
-    """Endpoint de readiness para Kubernetes/ECS"""
     return jsonify({
         'status': 'ready',
         'timestamp': datetime.utcnow().isoformat()
     }), 200
-
